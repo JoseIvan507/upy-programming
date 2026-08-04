@@ -1,0 +1,99 @@
+usuarios = {
+    "jperez": {"password": "1234", "rol": "alumno", "nombre": "Juan Perez"},
+    "amartin": {"password": "1234", "rol": "alumno", "nombre": "Ana Martín"},
+    "dgimenez": {"password": "1234", "rol": "alumno", "nombre": "Didier Gimenez"},
+    "cmedina": {"password": "1234", "rol": "alumno", "nombre": "Camila Medina"},
+    "vcachon": {"password": "1234", "rol": "alumno", "nombre": "Veronica Cachon"},
+    "falcocer": {"password": "1234", "rol": "alumno", "nombre": "Fabio Alcocer"},
+    "mlopez": {"password": "1234", "rol": "maestro", "nombre": "Maria López"},
+    "rgarcia": {"password": "1234", "rol": "coordinador", "nombre": "Rosa García"},
+}
+materias = ("Matemáticas", "Programación", "Inglés")
+calificaciones = {
+    "jperez": {"Matemáticas": 8.5, "Programación": 9.0, "Inglés": 7.5},
+    "amartin": {"Matemáticas": 10.0, "Programación": 8.0, "Inglés": 5.0},
+    "dgimenez": {"Matemáticas": 9.0, "Programación": 8.5, "Inglés": 9.0},
+    "cmedina": {"Matemáticas": 7.0, "Programación": 10.0, "Inglés": 10.0},
+    "vcachon": {"Matemáticas": 7.8, "Programación": 9.0, "Inglés": 7.0},
+    "falcocer": {"Matemáticas": 8.7, "Programación": 8.0, "Inglés": 8.0},
+}
+
+try:
+    intentos = 0
+    datos_user = None
+    while True:
+        usuario = input("Ingrese su usuario: ").strip()
+        contraseña = input("Ingrese su contraseña: ").strip()
+        datos_user = usuarios.get(usuario)
+        if datos_user and datos_user["password"] == contraseña:
+            break
+        intentos += 1
+        print("Usuario o Contraseña incorrecta")
+        if intentos >= 5:
+            print("Demasiados intentos fallidos. Cerrando el programa.")
+            raise SystemExit
+
+    rol = datos_user["rol"]
+    nombre = datos_user["nombre"]
+    print(f"Bienvenido, {nombre} ({rol})")
+
+    if rol == "alumno":
+        materias_aprobadas = set()
+        materias_reprobadas = set()
+        califs_alumno = calificaciones.get(usuario, {})
+        if not califs_alumno:
+            print("No hay calificaciones registradas para este alumno.")
+        else:
+            print(f"Boleta de {nombre}")
+            for materia, calif in califs_alumno.items():
+                print(f"{materia} : {calif}")
+                if calif >= 8:
+                    materias_aprobadas.add(materia)
+                else:
+                    materias_reprobadas.add(materia)
+            print(f"Materias aprobadas: {materias_aprobadas}")
+            print(f"Materias reprobadas: {materias_reprobadas}")
+
+    elif rol == "maestro":
+        alumno = input("Ingrese el usuario del alumno deseado: ").strip()
+        materia = input("Ingrese la materia deseada: ").strip()
+
+        if alumno not in calificaciones:
+            print("El alumno no existe.")
+        elif materia not in materias:
+            print(f"Error: la materia no existe. Materias válidas: {', '.join(materias)}")
+        else:
+            calificacion = None
+            while calificacion is None:
+                entrada = input("Ingrese la nueva calificación (0 a 10): ").strip()
+                try:
+                    valor = float(entrada)
+                    if 0 <= valor <= 10:
+                        calificacion = valor
+                    else:
+                        print("Error: la calificación debe estar entre 0 y 10.")
+                except ValueError:
+                    print("Error: ingrese un número válido.")
+
+            calificaciones[alumno][materia] = calificacion
+            print(
+                f"Alumno: {alumno}\nMateria: {materia}\n"
+                f"Nueva calificación: {calificacion}\nCalificación actualizada."
+            )
+
+    else:
+        for u in usuarios.values():
+            if u["rol"] == "maestro":
+                print(f"Maestra/o {u['nombre']}")
+        for materia in materias:
+            print(materia)
+        for est_id, califs in calificaciones.items():
+            nom_est = usuarios[est_id]["nombre"]
+            print(f"Estudiante {nom_est}: {califs}")
+
+except (KeyboardInterrupt, EOFError):
+    print("\nEntrada cancelada por el usuario.")
+except SystemExit:
+    pass
+except Exception as e:
+    print(f"Ocurrió un error inesperado: {e}")
